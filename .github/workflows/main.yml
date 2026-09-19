@@ -1,4 +1,4 @@
-name: Build CineNova APK
+name: CineNova Auto-Fix APK Builder
 
 on:
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Extract CineNova ZIP
+      - name: Extract CineNova project
         run: |
           rm -rf build-src
           mkdir build-src
@@ -33,9 +33,36 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x build-src/gradlew
 
-      - name: Build Debug APK
+      - name: First build attempt
+        id: first_build
+        continue-on-error: true
         working-directory: build-src
-        run: ./gradlew clean assembleDebug --no-daemon
+        run: |
+          ./gradlew clean assembleDebug --no-daemon --stacktrace
+
+      - name: Auto-fix known KSP CI error
+        if: steps.first_build.outcome == 'failure'
+        working-directory: build-src
+        run: |
+          echo "Auto-Fix: checking KSP version..."
+
+          if [ -f gradle/libs.versions.toml ]; then
+            sed -i 's/2\.3\.5/2.3.6/g' gradle/libs.versions.toml
+            echo "Auto-Fix: KSP 2.3.5 -> 2.3.6"
+          fi
+
+          echo "Auto-Fix completed."
+          ./gradlew --stop || true
+
+      - name: Second build attempt after Auto-Fix
+        if: steps.first_build.outcome == 'failure'
+        working-directory: build-src
+        run: |
+          ./gradlew clean assembleDebug --no-daemon --stacktrace
+
+      - name: Find APK
+        run: |
+          find build-src -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
