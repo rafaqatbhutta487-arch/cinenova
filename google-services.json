@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "979337680767",
+    "firebase_url": "https://studio-338445536-3b834-default-rtdb.firebaseio.com",
+    "project_id": "studio-338445536-3b834",
+    "storage_bucket": "studio-338445536-3b834.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:979337680767:android:2d9732be7bb203769eac4a",
+        "android_client_info": {
+          "package_name": "com.aistudio.cinenova.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "979337680767-86497cb3mlhb97kbfirsg5gmrmog0vht.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvAezRz_PEdm58ZlFr_6tSGBQrzolwqrI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "979337680767-86497cb3mlhb97kbfirsg5gmrmog0vht.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "CineNova",
+  "description": "User-facing cinematic movie streaming, shorts, video player, tasks, and reward coin application.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
