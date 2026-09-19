@@ -1,16 +1,58 @@
+name: CineNova Auto-Fix APK Builder
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Extract CineNova project
+        run: |
+          rm -rf build-src
+          mkdir build-src
+          unzip -q cinenova-APK-ready-fixed.zip -d build-src
+
+      - name: Make Gradle executable
+        run: chmod +x build-src/gradlew
+
+      - name: First build attempt
+        id: first_build
+        continue-on-error: true
+        working-directory: build-src
+        run: |
+          ./gradlew clean assembleDebug --no-daemon --stacktrace
+
       - name: Auto-Fix Android Build Errors
         if: steps.first_build.outcome == 'failure'
         working-directory: build-src
         run: |
           echo "===== AUTO-FIX START ====="
 
-          # Fix known KSP CI issue
+          # Fix KSP CI issue
           if [ -f gradle/libs.versions.toml ]; then
             sed -i 's/2\.3\.5/2.3.6/g' gradle/libs.versions.toml
             echo "KSP Auto-Fix: 2.3.5 -> 2.3.6"
           fi
 
-          # Fix missing Android debug keystore
+          # Fix missing debug keystore
           if [ ! -f debug.keystore ]; then
             echo "debug.keystore missing - generating it..."
 
@@ -33,3 +75,20 @@
           ./gradlew --stop || true
 
           echo "===== AUTO-FIX COMPLETE ====="
+
+      - name: Second build attempt after Auto-Fix
+        if: steps.first_build.outcome == 'failure'
+        working-directory: build-src
+        run: |
+          ./gradlew clean assembleDebug --no-daemon --stacktrace
+
+      - name: Find APK
+        run: |
+          find build-src -type f -name "*.apk" -print
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CineNova-APK
+          path: build-src/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
