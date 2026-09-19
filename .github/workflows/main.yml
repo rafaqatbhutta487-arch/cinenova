@@ -1,4 +1,4 @@
-name: Build APK
+name: Build CineNova APK
 
 on:
   workflow_dispatch:
@@ -6,12 +6,15 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout project
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -19,15 +22,23 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
+      - name: Clean project
+        run: ./gradlew clean
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug
+
+      - name: Find APK
+        run: find . -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: CineNova-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: '**/build/outputs/apk/debug/*.apk'
+          if-no-files-found: error
